@@ -58,3 +58,32 @@ def generate_orientacoes_table (df, orientadores):
     return pd.DataFrame(orientacoes_data, columns=['Orientador'] + list(tipo_de_orientacoes))
 
 
+def generate_bibliographic_prod_table (df, orientadores):
+    prod_by_orientador = _get_prod_by_orientador(df, orientadores)
+    tipo_de_producao = df['Tipo da produção'].unique()
+    bibliographic_prod_data = []
+
+    for orientador in orientadores:
+        orientador_row = [orientador]
+        orientador_df = prod_by_orientador[orientador]
+        periodicos = orientador_df[orientador_df['Tipo da produção'] == 'Artigo publicado em periódicos']
+        
+        qualis_counts = periodicos['Estrato Qualis (2017/2020) oficial'].value_counts()
+        qualis_sorted = ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4', 'C', 'NP']
+        qualis_counts_keys = qualis_counts.keys().tolist()
+        for qualis in qualis_sorted:
+            if (qualis in qualis_counts_keys):
+                orientador_row.append(int(qualis_counts[qualis]))
+            else:
+                orientador_row.append(0)
+
+        bibliographic_prod_data.append(orientador_row)
+
+    return pd.DataFrame(bibliographic_prod_data, columns=['Orientador', 'A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4', 'C', 'NP'])
+    
+
+
+
+
+
+

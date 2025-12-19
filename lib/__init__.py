@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd, chevron, math
 
 
 def read_orientadores_file(file_path):
@@ -119,21 +119,56 @@ def generate_prod_tec_table (df, orientadores):
     return pd.DataFrame(prod_tec_data, columns=['Orientador'] + tipos_tec)
 
 
-#def generate_prod_table_for_all (df_bib, df_tec, orientadores):
-#    bib_prod_por_orientador = _prod_by_orientador(df_bib, orientadores)
-#    tec_prod_por_orientador = _prod_by_orientador(df_tec, orientadores)
-#
-#    for orientador in orientadores:
-#        bib_df = bib_prod_por_orientador[orientador]
-#        tec_df = tec_prod_por_orientador[orientador]
-#    
-#        
+def generate_producao_nominal (df_bib, df_tec, orientadores):
+    full_report = []
 
+    bib_prod_por_orientador = _get_prod_by_orientador(df_bib, orientadores)
+    tec_prod_por_orientador = _get_prod_by_orientador(df_tec, orientadores)
 
+    for orientador in orientadores:
+        orientador_report = f'{orientador}\n - Produção Bibliográfica:\n------------------------------------\n'
+        producoes = []
+        
+        bib_df = bib_prod_por_orientador[orientador]
+        tec_df = tec_prod_por_orientador[orientador]
+    
+        for index, row in bib_df.iterrows():
+            with open('templates/artigo.txt', 'r', encoding='utf-8') as f:
+                if str(row['ISSN Periódico']) == 'nan':
+                    issn = 'N/A'
+                    snip = 'N/A'
+                    sjr = 'N/A'
+                else:
+                    issn = row['ISSN Periódico']
+                    snip = row['Source Normalized Impact per Paper (SNIP) – Scopus atual (2024)']
+                    sjr = row['SCImago Journal Rank (SJR) – Scopus atual (2024)']
 
+                params = {
+                    'titulo': row['Título da produção'],
+                    'tipo_producao': row['Tipo da produção'],
+                    'issn': issn,
+                    'periodico_evento': row['Periódico/Evento'],
+                    'ano': row['Ano da produção'],
+                    'qualis': row['Estrato Qualis (2017/2020) oficial'],
+                    'snip': snip,
+                    'sjr': sjr,
+                    'referencia': row['ABNT']
+                }
 
+                number_of_authors = int(row['Total de autores'])
+                authors = [] 
+                for i in range(1, number_of_authors + 1):
+                    author_key = f'Autor {i}'
+                    authors.append(row[author_key])
+                params['autores'] = ', '.join(authors)
+                producoes.append(chevron.render(f, params))
 
+        orientador_report += '\n------------------------------------\n'.join(producoes)
 
+        full_report.append(orientador_report)
+
+    with open('./results/producao-nominal.txt', 'w', encoding='utf-8') as f:
+        f.write('\n\n'.join(full_report))
 
 
 

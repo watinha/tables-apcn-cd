@@ -1,0 +1,10 @@
+Título: {{titulo}}
+Tipo da produção: {{tipo_producao}}
+ISSN: {{issn}}
+Periódico/Evento: {{periodico_evento}}
+Ano da publicação: {{ano}}
+Qualis: {{qualis}}
+SNIP: {{snip}}
+SJR: {{sjr}}
+Autores: {{autores}}
+Referência: {{referencia}}
